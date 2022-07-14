@@ -4,6 +4,7 @@ const cors = require('cors');
 const app = express()
 const db_chofer = require('./queries_chofer')
 const db_clientes = require('./queries_clientes')
+const db_fletes = require('./queries_fletes')
 const port = 3000
 
 app.use(bodyParser.json())
@@ -19,6 +20,9 @@ app.use(cors());
 app.get('/', (request, response) => {
     response.json({ info: 'Node.js, Express, and Postgres API' })
 })
+
+app.get('/flete', db_fletes.getFletes)
+app.post('/flete', db_fletes.crearFlete)
 
 app.get('/chofer', db_chofer.getChofer)
 app.get('/chofer/:id', db_chofer.getChoferById)
