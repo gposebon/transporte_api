@@ -25,12 +25,37 @@ const getFleteById = (request, response) => {
         response.status(200).json(results.rows)
     })
 }
+const calculoFlete = (tn, tarifa) => {
+    return parseFloat(tn) * parseFloat(tarifa);
+}
+
+const calculoGasoil = (ltsGasOil, precioGasOil) => {
+    return parseFloat(ltsGasOil) * parseFloat(precioGasOil)
+}
+
+const calculoGastos = (gastosPeaje, gastosPuerto, otrosGastos) => {
+    return parseFloat(gastosPeaje) + parseFloat(gastosPuerto) + parseFloat(otrosGastos)
+}
+
+const calculoPorcentajeDescuentoFlete = (importeFlete, porcentajeDescuento) => {
+    return importeFlete * porcentajeDescuento / 100 
+}
+
+const calculoPorcentajeDescuentoChofer = (totalDescuento, porcentajeChofer) => {
+    return totalDescuento * porcentajeChofer / 100 
+}
 
 const crearFlete = (request, response) => {
-    const { fecha, procede, destino, cp, km, tn, tarifa, importeFlete, 
+    let { fecha, procede, destino, cp, km, tn, tarifa, importeFlete, 
     ltsGasOil, precioGasOil, totalGasOil, proveedorGasOil, gastosPeaje, gastosPuerto,
     otrosGastos, totalGastos, porcentajeDescuento, totalDescuento, porcentajeChofer, totalChofer, 
     chofer, cliente } = request.body
+
+    importeFlete = calculoFlete(tn, tarifa)
+    totalGasOil = calculoGasoil(ltsGasOil, precioGasOil)
+    totalGastos = calculoGastos(gastosPeaje, gastosPuerto, otrosGastos)
+    totalDescuento = importeFlete - calculoPorcentajeDescuentoFlete(importeFlete, porcentajeDescuento)
+    totalChofer = calculoPorcentajeDescuentoChofer(totalDescuento, porcentajeChofer)
 
     pool.query('INSERT INTO fletes (fecha_flete, procede_flete, destino_flete, cartadeporte_flete, kilometros_flete, toneladas_flete, tarifa_flete, importe_flete, gasoil_flete, preciogasoil_flete, totalgasoil_flete, proveedorgasoil_flete, gastopeaje_flete, gastopuerto_flete, otrosgastos_flete, totalgastos_flete, porcentajedescuento_flete, totaldescuento_flete, porcentajechofer_flete, totalchofer_flete, idchofer_flete, idcliente_flete) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)', 
     [fecha, procede, destino, cp, km, tn, tarifa, importeFlete, ltsGasOil, precioGasOil, totalGasOil, 
